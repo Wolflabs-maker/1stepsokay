@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOLF LABS | FIRST STEPS A1</title>
+    <style>
+        /* --- DESIGN SYSTEM: WOLF PREMIUM --- */
+        :root {
+            --bg-deep: #020202;
+            --bg-panel: rgba(20, 20, 20, 0.7);
+            --wolf-green: #00E676;
+            --wolf-green-dim: rgba(0, 230, 118, 0.15);
+            --wolf-text: #E0E0E0;
+            --wolf-gray: #888;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(circle at 50% 0%, var(--wolf-green-dim) 0%, transparent 60%),
+                linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, #000 1px, #000 2px);
+            background-size: 100% 100%, 100% 100%, 100% 4px;
+            font-family: var(--font-main);
+            color: var(--wolf-text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- BRANDING --- */
+        .brand {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-family: var(--font-mono);
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--wolf-gray);
+            font-size: 14px;
+            z-index: 10;
+        }
+        .brand span { color: var(--wolf-green); }
+
+        /* --- CAPSULE NAVIGATION (UPDATED) --- */
+        .capsule-bar {
+            position: absolute;
+            top: 80px; /* Below branding */
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .capsule {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #666;
+            padding: 8px 16px; /* Slightly larger for clicking */
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            cursor: pointer; /* Interaction indicator */
+        }
+
+        .capsule:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: #fff;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .capsule.active {
+            background: rgba(0, 230, 118, 0.2);
+            border-color: var(--wolf-green);
+            color: var(--wolf-green);
+            box-shadow: 0 0 10px var(--wolf-green-dim);
+            pointer-events: none; /* Disable clicking active section */
+        }
+
+        /* --- MAIN ACTIVITY PANEL --- */
+        #main-stage {
+            position: absolute;
+            top: 18%; 
+            width: 90%;
+            max-width: 1000px;
+            min-height: 480px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TYPOGRAPHY --- */
+        h1.prompt {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-align: center;
+            margin: 0 0 10px 0;
+            line-height: 1.1;
+            background: linear-gradient(180deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.sub-prompt {
+            font-family: var(--font-mono);
+            color: var(--wolf-green);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .option-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .option-card:hover {
+            background: rgba(0, 230, 118, 0.1);
+            border-color: var(--wolf-green);
+            transform: translateY(-2px);
+        }
+        .option-card.correct { background: var(--wolf-green); color: #000; border-color: var(--wolf-green); }
+        .option-card.wrong { border-color: #ff3333; color: #ff3333; }
+
+        /* MATCHING GAME - FIXED */
+        .match-container { display: flex; justify-content: space-between; width: 100%; gap: 40px; }
+        .match-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .match-item {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .match-item:hover { border-color: var(--wolf-green); }
+        .match-item.selected { border-color: var(--wolf-green); background: rgba(0,230,118,0.2); box-shadow: 0 0 15px var(--wolf-green-dim); }
+        .match-item.matched { opacity: 0.4; pointer-events: none; border-color: #555; background: #000; color: #888; text-decoration: line-through; }
+        .match-item.shake { animation: shake 0.4s ease-in-out; border-color: #ff3333; }
+        
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        /* UNSCRAMBLE */
+        .sentence-slot {
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+            min-height: 80px; border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px; padding: 10px; width: 100%; align-items: center;
+        }
+        .word-bank { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .word-chip {
+            padding: 10px 20px; background: #333; border-radius: 8px; cursor: pointer;
+            font-family: var(--font-mono); font-weight: bold; border: 1px solid #444; font-size: 1.2rem;
+        }
+        .word-chip:hover { border-color: var(--wolf-green); transform: translateY(-2px); }
+
+        /* FLASHCARDS */
+        .flashcard {
+            width: 500px; height: 300px; perspective: 1000px; cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.6s; transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .fc-front, .fc-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; border: 1px solid var(--wolf-green);
+            background: rgba(0,0,0,0.8); flex-direction: column;
+            box-shadow: 0 0 30px rgba(0, 230, 118, 0.05);
+        }
+        .fc-front h2 { font-size: 4rem; color: #fff; margin: 0; }
+        .fc-back { transform: rotateY(180deg); background: var(--wolf-green); color: #000; }
+        .fc-back h2 { font-size: 2.5rem; margin: 0; }
+        .fc-back p { font-family: var(--font-mono); margin-top: 20px; font-size: 1.2rem; font-weight: bold; }
+
+        /* SPEAKING - ENHANCED */
+        .speak-indicator {
+            display: flex; align-items: center; gap: 10px;
+            color: var(--wolf-green); font-family: var(--font-mono); font-weight: bold;
+            font-size: 1.2rem; margin-bottom: 20px; background: rgba(0,230,118,0.1);
+            padding: 8px 16px; border-radius: 20px; border: 1px solid var(--wolf-green);
+        }
+        .mic-icon {
+            animation: pulse 1.5s infinite; font-size: 1.5rem;
+        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+
+        .starter-kit {
+            width: 100%; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            padding: 30px; background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%);
+            margin-top: 10px; display: flex; flex-direction: column; align-items: center;
+        }
+        .kit-label {
+            font-family: var(--font-mono); color: #888; font-size: 0.9rem; letter-spacing: 2px;
+            margin-bottom: 15px; text-transform: uppercase;
+        }
+        .speaking-frame {
+            border: 2px dashed rgba(255,255,255,0.3);
+            padding: 20px 40px; text-align: center; border-radius: 8px;
+            background: rgba(0,0,0,0.4); margin-bottom: 20px; width: 100%;
+        }
+        .speaking-frame h2 { font-size: 2.5rem; margin: 0; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .word-bank-speaking {
+            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+        }
+        .word-tag {
+            background: rgba(0,230,118,0.15); color: var(--wolf-green); 
+            padding: 10px 20px; border-radius: 6px; font-family: var(--font-mono); 
+            font-weight: bold; border: 1px solid rgba(0,230,118,0.3); font-size: 1.2rem;
+        }
+
+        /* TEACHER/TRANSLATION TOGGLES */
+        .teacher-note {
+            display: none; width: 100%; margin-top: 20px; padding: 15px;
+            background: rgba(255, 200, 0, 0.1); border-left: 3px solid #ffc800;
+            color: #ffc800; font-family: var(--font-mono); font-size: 0.9rem; text-align: left;
+        }
+        .translation-text {
+            display: none; color: #888; font-style: italic; font-size: 1.2rem; margin-top: 5px; margin-bottom: 20px;
+        }
+        body.show-teacher .teacher-note { display: block; }
+        body.show-translation .translation-text { display: block; }
+
+        /* --- CONTROL BAR --- */
+        #control-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            height: 80px; background: #0a0a0a; border-top: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 40px; z-index: 100;
+        }
+
+        .ctrl-group { display: flex; gap: 15px; align-items: center; }
+        
+        button.ctrl-btn {
+            background: transparent; border: 1px solid #444; color: #888;
+            padding: 8px 16px; font-family: var(--font-mono); font-size: 12px;
+            cursor: pointer; border-radius: 4px; transition: 0.2s; text-transform: uppercase;
+        }
+        button.ctrl-btn:hover { border-color: #fff; color: #fff; }
+        button.ctrl-btn.active { background: var(--wolf-green); color: #000; border-color: var(--wolf-green); font-weight: bold; }
+        
+        button.nav-btn {
+            background: #1a1a1a; color: #fff; border: 1px solid #333;
+            padding: 10px 24px; font-weight: bold; font-family: var(--font-main);
+            font-size: 14px; border-radius: 6px; cursor: pointer;
+        }
+        button.nav-btn:hover { background: #333; border-color: var(--wolf-green); }
+
+        #progress-display { font-family: var(--font-mono); color: var(--wolf-green); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <div class="brand">WOLF LABS <span>PREMIUM A1</span></div>
+
+    <!-- CAPSULE NAV -->
+    <div class="capsule-bar" id="capsule-bar">
+        <!-- Injected via JS -->
+    </div>
+
+    <!-- MAIN STAGE -->
+    <div id="main-stage">
+        <!-- Dynamic Content Injected Here -->
+    </div>
+
+    <!-- CONTROL BAR -->
+    <div id="control-bar">
+        <div class="ctrl-group">
+            <span id="progress-display">01 / 48</span>
+            <button class="ctrl-btn" onclick="toggleTranslation()" id="btn-trans">PT-BR: OFF</button>
+            <button class="ctrl-btn" onclick="toggleTeacher()" id="btn-teach">TEACHER: OFF</button>
+        </div>
+        <div class="ctrl-group">
+            <button class="nav-btn" onclick="prevStep()">← BACK</button>
+            <button class="ctrl-btn" onclick="resetStep()">RESET</button>
+            <button class="nav-btn" onclick="nextStep()" style="border-color: var(--wolf-green);">NEXT →</button>
+        </div>
+    </div>
+
+    <script>
+        // --- SECTIONS DEFINITION ---
+        const sections = [
+            "INTRO", "GREETINGS", "AFFIRMATIVE", "NEGATIVE", "INTERROGATIVE", "SPEAKING HUB"
+        ];
+
+        // --- DATA MODEL (EXPANDED TO ~48 STEPS) ---
+        const steps = [
+            // --- SECTION: INTRO ---
+            {
+                section: "INTRO", id: 1, type: 'info',
+                title: "WELCOME",
+                content: "First Steps: Absolute Beginner",
+                note: "Day 1 mindset: Don't translate everything. Just speak.",
+                trans: "Bem-vindo: Primeiros Passos"
+            },
+            {
+                section: "INTRO", id: 2, type: 'flashcard',
+                front: "HELLO", back: "OLÁ",
+                example: "Formal / General",
+                note: "Explain this is formal/neutral."
+            },
+            {
+                section: "INTRO", id: 3, type: 'flashcard',
+                front: "HI / HEY", back: "OI",
+                example: "Informal / Friends",
+                note: "Explain this is for friends."
+            },
+            // --- SECTION: GREETINGS ---
+            {
+                section: "GREETINGS", id: 4, type: 'flashcard',
+                front: "MY NAME IS...", back: "MEU NOME É...",
+                example: "My name is Tim.",
+                note: "Standard introduction."
+            },
+            {
+                section: "GREETINGS", id: 5, type: 'flashcard',
+                front: "NICE TO MEET YOU", back: "PRAZER EM CONHECÊ-LO",
+                example: "Hello. Nice to meet you.",
+                note: "Polite response."
+            },
+            {
+                section: "GREETINGS", id: 6, type: 'mcq',
+                prompt: "Greeting a BOSS (Formal)",
+                options: ["Hi!", "Hello.", "Yo!"],
+                correct: 1,
+                trans: "Cumprimentando um chefe (Formal)",
+                note: "Drill formal context."
+            },
+            {
+                section: "GREETINGS", id: 7, type: 'unscramble',
+                prompt: "Make a sentence:",
+                words: ["Hello", "I", "am", "Tim"],
+                correctOrder: ["Hello", "I", "am", "Tim"],
+                trans: "Monte a frase: Olá eu sou Tim",
+                note: "Subject + Verb order."
+            },
+            {
+                section: "GREETINGS", id: 8, type: 'matching',
+                prompt: "Match the Context",
+                pairs: [ {a: "Formal", b: "Hello"}, {a: "Informal", b: "Hi"} ],
+                note: "Drag/Click to connect pairs."
+            },
+            {
+                section: "GREETINGS", id: 9, type: 'speaking',
+                prompt: "Greet a friend",
+                frame: "____! How are you?",
+                words: ["Hi", "Hey", "Hello"],
+                hints: ["Use informal language."],
+                trans: "Cumprimente um amigo",
+                note: "Encourage 'Hey' or 'Hi'."
+            },
+            {
+                section: "GREETINGS", id: 10, type: 'check',
+                title: "CHECKPOINT",
+                content: "Formal: Hello<br>Informal: Hi / Hey",
+                note: "Quick review before moving on."
+            },
+            // --- SECTION: AFFIRMATIVE ---
+            {
+                section: "AFFIRMATIVE", id: 11, type: 'info',
+                title: "IDENTITY",
+                content: "OPTION A: I am...<br>OPTION B: My name is...",
+                trans: "Duas formas de dizer quem você é.",
+                note: "Teach both forms."
+            },
+            {
+                section: "AFFIRMATIVE", id: 12, type: 'mcq',
+                prompt: "I ______ Tim.",
+                options: ["is", "am", "are"],
+                correct: 1,
+                trans: "Eu ____ Tim.",
+                note: "Verb to be: I AM."
+            },
+            {
+                section: "AFFIRMATIVE", id: 13, type: 'gapfill',
+                prompt: "My ______ is Sarah.",
+                options: ["name", "am", "call"],
+                correct: "name",
+                trans: "Meu _____ é Sarah.",
+                note: "Possessive structure."
+            },
+            {
+                section: "AFFIRMATIVE", id: 14, type: 'unscramble',
+                prompt: "Unscramble:",
+                words: ["is", "name", "My", "Tom"],
+                correctOrder: ["My", "name", "is", "Tom"],
+                trans: "Meu nome é Tom",
+                note: "Check syntax."
+            },
+            {
+                section: "AFFIRMATIVE", id: 15, type: 'speaking',
+                prompt: "Introduce yourself",
+                frame: "Hello! My name is ____.",
+                words: ["(Your Name)"],
+                hints: ["Speak clearly."],
+                trans: "Apresente-se",
+                note: "Student must use their real name."
+            },
+            {
+                section: "AFFIRMATIVE", id: 16, type: 'flashcard',
+                front: "PRONOUNS", back: "I (Eu) / YOU (Você) / HE (Ele) / SHE (Ela)",
+                example: "Memorize these.",
+                note: "The 'Big 4' pronouns."
+            },
+            {
+                section: "AFFIRMATIVE", id: 17, type: 'matching',
+                prompt: "Match Pronoun to Verb",
+                pairs: [ {a: "I", b: "Am"}, {a: "You", b: "Are"}, {a: "He", b: "Is"} ],
+                note: "Core grammar drill."
+            },
+            {
+                section: "AFFIRMATIVE", id: 18, type: 'mcq',
+                prompt: "He ______ Tim.",
+                options: ["am", "is", "are"],
+                correct: 1,
+                trans: "Ele ____ Tim.",
+                note: "He IS."
+            },
+            {
+                section: "AFFIRMATIVE", id: 19, type: 'mcq',
+                prompt: "She ______ Sian.",
+                options: ["is", "are", "am"],
+                correct: 0,
+                trans: "Ela ____ Sian.",
+                note: "She IS."
+            },
+            {
+                section: "AFFIRMATIVE", id: 20, type: 'gapfill',
+                prompt: "You ______ a student.",
+                options: ["is", "are", "am"],
+                correct: "are",
+                trans: "Você ____ um estudante.",
+                note: "You ARE."
+            },
+            {
+                section: "AFFIRMATIVE", id: 21, type: 'speaking',
+                prompt: "Point and Say",
+                frame: "He is ____. She is ____.",
+                words: ["Carlos", "Maria", "Tim"],
+                hints: ["Use 'He' for males, 'She' for females."],
+                trans: "Aponte e diga",
+                note: "Drill gender pronouns."
+            },
+            {
+                section: "AFFIRMATIVE", id: 22, type: 'check',
+                title: "VERB TO BE",
+                content: "I AM<br>YOU ARE<br>HE/SHE IS",
+                note: "Visual reinforcement."
+            },
+            // --- SECTION: NEGATIVE ---
+            {
+                section: "NEGATIVE", id: 23, type: 'info',
+                title: "THE NEGATIVE",
+                content: "ADD 'NOT' AFTER THE VERB.<br>I AM <span style='color:var(--wolf-green)'>NOT</span>...",
+                trans: "Para negar, adicione NOT após o verbo.",
+                note: "Introduce negation rule."
+            },
+            {
+                section: "NEGATIVE", id: 24, type: 'mcq',
+                prompt: "I ______ not Tim.",
+                options: ["is", "am", "are"],
+                correct: 1,
+                trans: "Eu não sou Tim.",
+                note: "I AM NOT."
+            },
+            {
+                section: "NEGATIVE", id: 25, type: 'unscramble',
+                prompt: "Make it negative:",
+                words: ["is", "not", "He", "Carlos"],
+                correctOrder: ["He", "is", "not", "Carlos"],
+                trans: "Ele não é Carlos",
+                note: "Check syntax."
+            },
+            {
+                section: "NEGATIVE", id: 26, type: 'gapfill',
+                prompt: "She ______ not Sian.",
+                options: ["is", "isn't", "aren't"],
+                correct: "is",
+                trans: "Ela não é Sian.",
+                note: "Focus on full form first."
+            },
+            {
+                section: "NEGATIVE", id: 27, type: 'mcq',
+                prompt: "You ______ not my boss.",
+                options: ["am", "are", "is"],
+                correct: 1,
+                trans: "Você não é meu chefe.",
+                note: "You ARE NOT."
+            },
+            {
+                section: "NEGATIVE", id: 28, type: 'flashcard',
+                front: "CONTRACTIONS", back: "IS NOT = ISN'T<br>ARE NOT = AREN'T",
+                example: "He isn't Tim. You aren't Sian.",
+                note: "Explain short forms."
+            },
+            {
+                section: "NEGATIVE", id: 29, type: 'mcq',
+                prompt: "He ______ Tim. (Short)",
+                options: ["isn't", "aren't", "not"],
+                correct: 0,
+                trans: "Ele não é Tim (Curto).",
+                note: "Drill ISN'T."
+            },
+            {
+                section: "NEGATIVE", id: 30, type: 'speaking',
+                prompt: "Deny Identity",
+                frame: "I am not ____. I am ____.",
+                words: ["Tim", "(Your Name)", "Sian"],
+                hints: ["Say who you are NOT, then who you ARE."],
+                trans: "Negue a identidade",
+                note: "Contrast negative and affirmative."
+            },
+             {
+                section: "NEGATIVE", id: 31, type: 'check',
+                title: "NEGATIVE CHECK",
+                content: "I AM NOT<br>HE IS NOT (ISN'T)<br>YOU ARE NOT (AREN'T)",
+                note: "Review negative forms."
+            },
+            // --- SECTION: INTERROGATIVE ---
+            {
+                section: "INTERROGATIVE", id: 32, type: 'info',
+                title: "THE QUESTION",
+                content: "SWAP THE POSITION.<br>YOU ARE -> <span style='color:var(--wolf-green)'>ARE YOU...?</span>",
+                trans: "Inverta a posição para perguntar.",
+                note: "Introduce inversion rule."
+            },
+            {
+                section: "INTERROGATIVE", id: 33, type: 'unscramble',
+                prompt: "Make a question:",
+                words: ["you", "Are", "Sian", "?"],
+                correctOrder: ["Are", "you", "Sian", "?"],
+                trans: "Você é Sian?",
+                note: "Check inversion."
+            },
+            {
+                section: "INTERROGATIVE", id: 34, type: 'mcq',
+                prompt: "______ he Tim?",
+                options: ["Am", "Is", "Are"],
+                correct: 1,
+                trans: "Ele é Tim?",
+                note: "IS he?"
+            },
+            {
+                section: "INTERROGATIVE", id: 35, type: 'gapfill',
+                prompt: "______ I in the correct room?",
+                options: ["Is", "Am", "Are"],
+                correct: "Am",
+                trans: "Eu estou na sala certa?",
+                note: "AM I?"
+            },
+            {
+                section: "INTERROGATIVE", id: 36, type: 'mcq',
+                prompt: "______ you from Brazil?",
+                options: ["Is", "Are", "Am"],
+                correct: 1,
+                trans: "Você é do Brasil?",
+                note: "ARE you?"
+            },
+            {
+                section: "INTERROGATIVE", id: 37, type: 'speaking',
+                prompt: "Ask a Name",
+                frame: "Are you ____?",
+                words: ["Carlos", "Maria", "Tim"],
+                hints: ["Ask if the person is someone specific."],
+                trans: "Pergunte o nome",
+                note: "Direct question."
+            },
+            {
+                section: "INTERROGATIVE", id: 38, type: 'check',
+                title: "QUESTION CHECK",
+                content: "AM I...?<br>IS HE...?<br>ARE YOU...?",
+                note: "Review interrogative forms."
+            },
+            // --- SECTION: SPEAKING HUB ---
+             {
+                section: "SPEAKING HUB", id: 39, type: 'info',
+                title: "SPEAKING HUB",
+                content: "MIXED DRILLS.<br>AFFIRMATIVE, NEGATIVE & QUESTIONS.",
+                trans: "Exercícios mistos de fala.",
+                note: "Combine all logic."
+            },
+            {
+                section: "SPEAKING HUB", id: 40, type: 'speaking',
+                prompt: "The Stranger",
+                frame: "Hello! I am ____. Are you ____?",
+                words: ["(Your Name)", "Tim", "Sian"],
+                hints: ["Introduce yourself and ask a name."],
+                trans: "O Estranho",
+                note: "Roleplay starter."
+            },
+            {
+                section: "SPEAKING HUB", id: 41, type: 'speaking',
+                prompt: "Correcting Info",
+                frame: "No, he isn't ____. He is ____.",
+                words: ["Tim", "Carlos", "John"],
+                hints: ["Correct the wrong name."],
+                trans: "Corrigindo informação",
+                note: "Use negative then affirmative."
+            },
+            {
+                section: "SPEAKING HUB", id: 42, type: 'mcq',
+                prompt: "FINAL TEST: Negative",
+                options: ["He no is Tim.", "He isn't Tim."],
+                correct: 1,
+                trans: "TESTE FINAL: Negativo",
+                note: "Common error check."
+            },
+            {
+                section: "SPEAKING HUB", id: 43, type: 'mcq',
+                prompt: "FINAL TEST: Question",
+                options: ["You are Sian?", "Are you Sian?"],
+                correct: 1,
+                trans: "TESTE FINAL: Pergunta",
+                note: "Intonation vs Grammar."
+            },
+            {
+                section: "SPEAKING HUB", id: 44, type: 'gapfill',
+                prompt: "I ______ not a student.",
+                options: ["is", "am", "are"],
+                correct: "am",
+                trans: "Eu não sou um estudante.",
+                note: "Final I AM NOT."
+            },
+             {
+                section: "SPEAKING HUB", id: 45, type: 'unscramble',
+                prompt: "Final Challenge:",
+                words: ["not", "She", "Maria", "is"],
+                correctOrder: ["She", "is", "not", "Maria"],
+                trans: "Ela não é Maria",
+                note: "Final syntax check."
+            },
+            {
+                section: "SPEAKING HUB", id: 46, type: 'speaking',
+                prompt: "ULTIMATE MISSION",
+                frame: "Hi! I am ____. I'm not ____. Are you ____?",
+                words: ["(Real Name)", "(Fake Name)", "Teacher"],
+                hints: ["3 Steps: Affirmative, Negative, Question."],
+                trans: "MISSÃO SUPREMA",
+                note: "Complex output."
+            },
+            {
+                section: "SPEAKING HUB", id: 47, type: 'info',
+                title: "CONGRATULATIONS",
+                content: "Module A1.1 Complete.<br>System Offline.",
+                trans: "Módulo A1.1 Completo.",
+                note: "End of extended session."
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentStep = 0;
+        let transEnabled = false;
+        let teacherEnabled = false;
+        const mainStage = document.getElementById('main-stage');
+        const progressDisplay = document.getElementById('progress-display');
+        const capsuleBar = document.getElementById('capsule-bar');
+
+        // --- CAPSULE LOGIC ---
+        function renderCapsules() {
+            capsuleBar.innerHTML = sections.map(sec => 
+                `<div class="capsule" id="cap-${sec}" onclick="jumpToSection('${sec}')">${sec}</div>`
+            ).join('');
+        }
+
+        function updateCapsules() {
+            const currentSection = steps[currentStep].section;
+            document.querySelectorAll('.capsule').forEach(cap => {
+                cap.classList.remove('active');
+                if (cap.id === `cap-${currentSection}`) {
+                    cap.classList.add('active');
+                }
+            });
+        }
+        
+        // --- NAVIGATION LOGIC ---
+        function jumpToSection(sec) {
+            const index = steps.findIndex(s => s.section === sec);
+            if (index !== -1) {
+                currentStep = index;
+                renderStep();
+            }
+        }
+
+        // --- RENDER ENGINE ---
+        function renderStep() {
+            const step = steps[currentStep];
+            mainStage.innerHTML = '';
+            progressDisplay.innerText = `${String(currentStep + 1).padStart(2, '0')} / ${steps.length}`;
+            updateCapsules();
+
+            // Create Content based on type
+            let html = '';
+            
+            // Common Teacher Note
+            const teacherNote = `<div class="teacher-note"><strong>TEACHER:</strong> ${step.note || "No notes."}</div>`;
+
+            if (step.type === 'info') {
+                html = `
+                    <h1 class="prompt">${step.title}</h1>
+                    <p style="font-size: 2rem; text-align: center; line-height: 1.5;">${step.content}</p>
+                    <div class="translation-text">${step.trans || ''}</div>
+                `;
+            } 
+            else if (step.type === 'flashcard') {
+                html = `
+                    <p class="sub-prompt">CLICK TO FLIP</p>
+                    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="fc-front"><h2>${step.front}</h2></div>
+                            <div class="fc-back"><h2>${step.back}</h2><p>${step.example}</p></div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (step.type === 'mcq') {
+                html = `
+                    <h1 class="prompt">${step.prompt}</h1>
+                    <div class="translation-text">${step.trans || ''}</div>
+                    <div class="btn-grid">
+                        ${step.options.map((opt, i) => `
+                            <div class="option-card" onclick="checkMCQ(this, ${i}, ${step.correct})">${opt}</div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (step.type === 'gapfill') {
+                html = `
+                    <h1 class="prompt">${step.prompt.replace('______', '<span style="color:var(--wolf-green); text-decoration:underline;">______</span>')}</h1>
+                    <div class="translation-text">${step.trans || ''}</div>
+                    <div class="btn-grid">
+                        ${step.options.map(opt => `
+                            <div class="option-card" onclick="checkGap(this, '${opt}', '${step.correct}')">${opt}</div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            else if (step.type === 'matching') {
+                // FIXED SHUFFLE LOGIC
+                let indices = step.pairs.map((_, i) => i);
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+
+                html = `<h1 class="prompt">${step.prompt}</h1>`;
+                html += `<div class="match-container">`;
+                html += `<div class="match-col" id="col-a">`;
+                html += step.pairs.map((p, i) => 
+                    `<div class="match-item" data-idx="${i}" onclick="selectMatch(this, 'a')">${p.a}</div>`
+                ).join('');
+                html += `</div>`;
+                html += `<div class="match-col" id="col-b">`;
+                html += indices.map(i => 
+                    `<div class="match-item" data-idx="${i}" onclick="selectMatch(this, 'b')">${step.pairs[i].b}</div>`
+                ).join('');
+                html += `</div>`;
+                html += `</div>`;
+            }
+            else if (step.type === 'unscramble') {
+                html = `
+                    <h1 class="prompt">${step.prompt}</h1>
+                    <div class="translation-text">${step.trans || ''}</div>
+                    <div class="sentence-slot" id="sentence-slot"></div>
+                    <div class="word-bank">
+                        ${step.words.sort(() => Math.random() - 0.5).map(w => `<div class="word-chip" onclick="moveWord(this)">${w}</div>`).join('')}
+                    </div>
+                    <button class="nav-btn" style="margin-top:20px" onclick="checkUnscramble('${step.correctOrder.join(' ')}')">CHECK</button>
+                    <p id="unscramble-msg" style="height: 20px; color: var(--wolf-green); font-weight:bold; margin-top:10px;"></p>
+                `;
+            }
+            else if (step.type === 'speaking') {
+                // ENHANCED SPEAKING UI - CENTRALIZED STARTERS
+                html = `
+                    <div class="speak-indicator">
+                        <i class="fas fa-microphone mic-icon"></i> SPEAK NOW
+                    </div>
+                    <h1 class="prompt">${step.prompt}</h1>
+                    <div class="translation-text">${step.trans || ''}</div>
+                    
+                    <div class="starter-kit">
+                        <div class="kit-label">SPEAKING STARTERS</div>
+                        <div class="speaking-frame">
+                            <h2>${step.frame}</h2>
+                        </div>
+                        <div class="word-bank-speaking">
+                            ${step.words.map(w => `<span class="word-tag">${w}</span>`).join('')}
+                        </div>
+                    </div>
+                    <p style="color:#666; font-size:0.9rem; margin-top:15px; font-family:var(--font-mono);">HINT: ${step.hints[0]}</p>
+                `;
+            }
+            else if (step.type === 'check') {
+                html = `
+                    <h1 class="prompt" style="color:var(--wolf-green);">${step.title}</h1>
+                    <div style="font-size: 2rem; text-align: center; line-height: 1.6; border: 2px solid var(--wolf-green); padding: 30px; border-radius: 12px; background: rgba(0,230,118,0.05);">
+                        ${step.content}
+                    </div>
+                `;
+            }
+
+            mainStage.innerHTML = html + teacherNote;
+        }
+
+        // --- LOGIC HANDLERS ---
+        
+        function checkMCQ(el, idx, correctIdx) {
+            if (idx === correctIdx) { el.classList.add('correct'); } else { el.classList.add('wrong'); }
+        }
+
+        function checkGap(el, val, correctVal) {
+            if (val === correctVal) { el.classList.add('correct'); } else { el.classList.add('wrong'); }
+        }
+
+        let selectedA = null;
+        function selectMatch(el, col) {
+            if (el.classList.contains('matched')) return;
+            if (col === 'a') {
+                if (selectedA) selectedA.classList.remove('selected');
+                selectedA = el;
+                el.classList.add('selected');
+            } else if (col === 'b' && selectedA) {
+                if (el.dataset.idx === selectedA.dataset.idx) {
+                    el.classList.add('matched');
+                    selectedA.classList.add('matched');
+                    selectedA.classList.remove('selected');
+                    selectedA = null;
+                } else {
+                    el.classList.add('shake');
+                    setTimeout(() => el.classList.remove('shake'), 400);
+                }
+            }
+        }
+
+        function moveWord(el) {
+            const slot = document.getElementById('sentence-slot');
+            const bank = document.querySelector('.word-bank');
+            if (el.parentElement === bank) { slot.appendChild(el); } else { bank.appendChild(el); }
+        }
+        
+        function checkUnscramble(correctStr) {
+            const slot = document.getElementById('sentence-slot');
+            const currentStr = Array.from(slot.children).map(c => c.innerText).join(' ');
+            const msg = document.getElementById('unscramble-msg');
+            if (currentStr === correctStr) {
+                msg.innerText = "CORRECT!";
+                msg.style.color = "var(--wolf-green)";
+            } else {
+                msg.innerText = "TRY AGAIN";
+                msg.style.color = "#ff3333";
+            }
+        }
+
+        function nextStep() { if (currentStep < steps.length - 1) { currentStep++; renderStep(); } }
+        function prevStep() { if (currentStep > 0) { currentStep--; renderStep(); } }
+        function resetStep() { renderStep(); }
+
+        function toggleTranslation() {
+            transEnabled = !transEnabled;
+            document.body.classList.toggle('show-translation', transEnabled);
+            document.getElementById('btn-trans').innerText = transEnabled ? "PT-BR: ON" : "PT-BR: OFF";
+            document.getElementById('btn-trans').classList.toggle('active', transEnabled);
+        }
+
+        function toggleTeacher() {
+            teacherEnabled = !teacherEnabled;
+            document.body.classList.toggle('show-teacher', teacherEnabled);
+            document.getElementById('btn-teach').innerText = teacherEnabled ? "TEACHER: ON" : "TEACHER: OFF";
+            document.getElementById('btn-teach').classList.toggle('active', teacherEnabled);
+        }
+
+        // Init
+        renderCapsules();
+        renderStep();
+
+    </script>
+</body>
+</html>
